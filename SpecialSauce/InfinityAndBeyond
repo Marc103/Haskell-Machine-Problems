@@ -1,0 +1,40 @@
+-- So much for all the code below... Well it was fun
+
+-- BELOW IS THE HIGHLY INEFFICIENT, CRACKED VERSION OF treeFromList, named treeFromList'
+-- ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-- //////////////////////////////////// DANGER CODE v /////////////////////////////////////////////////////////////////////////////////
+-- ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+-- Even though i have the data, not sure how to put it on this format so im just going to pick the millionth generation
+-- so take n will work correctly for n up to a million... nevermind a million takes way to long to compute so I'm going to do 10000 
+-- (lol please forgive me)
+
+treeFromList' inf = pickGeneration 10000 (twigFromList inf)
+twigFromList inf@(i:ls) = generationalTrees inf (infinityAndBeyond) (treeRepeat i)
+
+-- Selects a generation out of the infinite list of generations of binTrees (the further the generation, the more values are updated)
+pickGeneration :: Int -> [BinTree a] -> BinTree a
+pickGeneration 0 (g:enerations) = g
+pickGeneration n (g:enerations) = pickGeneration (n-1) enerations   
+
+-- create the generation, passing on the altered generation to the next one 
+generationalTrees :: [a] -> [[Direction]] -> BinTree a -> [BinTree a]
+generationalTrees (i:ls) (d:ds) node = alteredGeneration: generationalTrees ls ds alteredGeneration
+                                          where alteredGeneration = traverseCondition i [] d node
+
+-- path starts at empty
+-- if the condition is met, set the value of the node to alternate value then continue down the infinite binTree
+traverseCondition :: a -> [Direction] -> [Direction] -> BinTree a -> BinTree a
+traverseCondition alt path condition (Node val left right) | path == condition = Node alt (traverseCondition alt (path++[L]) condition left) (traverseCondition alt (path++[R]) condition right)
+                                                           | otherwise = Node val (traverseCondition alt (path++[L]) condition left) (traverseCondition alt (path++[R]) condition right)
+-- ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-- //////////////////////////////////// DANGER CODE ^ /////////////////////////////////////////////////////////////////////////////////
+-- ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+-- Quick internet reading lead me to some code that uses nomads to find combinations of [] of values
+-- of any width.. in a much more concise manner 
+combLR 0 = return []
+combLR n = do
+    x <- [L,R]
+    xs <- combLR (n - 1)
+    return (x : xs)
